@@ -1,4 +1,4 @@
-# YB_WSS_AI
+# YB_MCWSS_AI
 
 一個基於 Electron 的 Minecraft WebSocket Server AI GUI。
 
@@ -28,6 +28,9 @@ npm install
 ```bash
 npm start
 ```
+
+## 連不到的 EXE
+[YB_MCWSS_AI.exe](https://drive.google.com/file/d/1YvZRsXL0TUrYU8xk83590GO7M0NLN3No/view?usp=sharing)
 
 ## 關於這個 `README.md`
 ChatGPT 生成的 lol
