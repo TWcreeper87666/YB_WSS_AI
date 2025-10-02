@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+  <meta charset="UTF-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>YB MCWSS AI 控制面板</title>
+
+  <style>
+    body {
+      font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #36393f;
+      margin: 0;
+      color: #e3e3e3;
+      -webkit-font-smoothing: antialiased;
+      padding: 10px 21px;
+    }
+
+    .container-wrapper {
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 17px;
+      border-bottom: 1px solid #2874a6;
+      margin-bottom: 14px;
+    }
+
+    .header h1 {
+      font-size: 22px;
+      margin: 0;
+      font-weight: 600;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      background-color: #40444b;
+      border-radius: 6px;
+      padding: 7px 11px;
+      gap: 10px;
+    }
+
+    .header-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .header-buttons button {
+      padding: 7px 11px;
+      border: none;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s, background-color 0.2s;
+      color: #fff;
+      box-shadow: 0 1px 7px rgba(0, 0, 0, 0.2);
+    }
+
+    .header-buttons button:active {
+      transform: translateY(1px);
+    }
+
+    .header-buttons .open-btn {
+      background-color: #2874a6;
+    }
+
+    .header-buttons .close-btn {
+      background-color: #72767d;
+    }
+
+    /* 新增的 open-log-btn 樣式 */
+    .header-buttons .open-log-btn {
+      background-color: #5d9a5d;
+    }
+
+    .info-icon {
+      font-size: 17px;
+      color: #e3e3e3;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .info-icon:hover {
+      color: #2874a6;
+    }
+
+    .status-text {
+      font-size: 11px;
+      font-weight: 500;
+      color: #b9bbbe;
+    }
+
+    .settings-container {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .settings-group {
+      background-color: #40444b;
+      border-radius: 7px;
+      padding: 18px;
+      box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .settings-group h2 {
+      font-size: 14px;
+      margin-top: 0;
+      margin-bottom: 14px;
+      color: #fff;
+      position: relative;
+    }
+
+    .settings-group h2::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -6px;
+      width: 35px;
+      height: 2px;
+      background-color: #2874a6;
+      border-radius: 1px;
+    }
+
+    /* 統一 label 樣式 */
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: #b9bbbe;
+      font-size: 11px;
+    }
+
+    .input-group {
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .input-group input,
+    .input-group textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #2874a6;
+      border-radius: 4px;
+      font-size: 11px;
+      background-color: #2f3136;
+      color: #fff;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+
+    .input-group input:focus,
+    .input-group textarea:focus {
+      outline: none;
+      border-color: #5dade2;
+    }
+
+    .input-group textarea {
+      height: 242px;
+      resize: none;
+    }
+
+    .toggle-switch-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .toggle-switch-group span {
+      font-size: 11px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 35px;
+      height: 20px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #2874a6;
+      transition: 0.4s;
+      border-radius: 20px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+
+    input:checked+.slider:before {
+      transform: translateX(15px);
+    }
+
+    .slider-group {
+      font-size: 11px;
+    }
+
+    .creativity-slider {
+      width: 100%;
+    }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 7px;
+      font-size: 11px;
+      color: #72767d;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: #36393f;
+      padding: 21px;
+      border-radius: 8px;
+      width: 350px;
+      position: relative;
+      animation: slide-in 0.3s forwards;
+      box-shadow: 0 7px 28px rgba(0, 0, 0, 0.5);
+      color: #e3e3e3;
+    }
+
+    /* Log Modal 樣式 */
+    #logModal .modal-content {
+      width: 80vw;
+      height: 80vh;
+      max-width: 1200px;
+      max-height: 800px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #logModal .modal-content h2 {
+      border-bottom: 1px solid #5d9a5d;
+      color: #5d9a5d;
+    }
+
+    .log-content {
+      background-color: #2f3136;
+      color: #b9bbbe;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #40444b;
+      flex-grow: 1;
+      overflow-y: auto;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      font-size: 21px;
+      font-weight: bold;
+      color: #b9bbbe;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+      color: #fff;
+    }
+
+    .modal-content h2 {
+      font-size: 17px;
+      margin-top: 0;
+      margin-bottom: 11px;
+      color: #2874a6;
+      border-bottom: 1px solid #2874a6;
+      padding-bottom: 4px;
+    }
+
+    .modal-content p,
+    .modal-content ul {
+      font-size: 11px;
+      line-height: 1.2;
+      color: #b9bbbe;
+    }
+
+    .modal-content ul {
+      padding-left: 14px;
+    }
+
+    .modal-content a {
+      color: #2874a6;
+      text-decoration: none;
+    }
+
+    .modal-content a:hover {
+      text-decoration: underline;
+    }
+
+    @keyframes slide-in {
+      from {
+        transform: translateY(-35px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    #toastContainer {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 50%;
+      box-sizing: border-box;
+    }
+
+    .toast {
+      background-color: #2f3136;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      color: #e3e3e3;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.fade-out {
+      opacity: 0;
+    }
+
+    .toast-body {
+      font-size: 11px;
+      line-height: 1.4;
+      word-break: break-all;
+      flex-grow: 1;
+      /* 讓內容佔滿空間 */
+      padding-right: 10px;
+      /* 避免文字與X重疊 */
+    }
+
+    .toast-close {
+      font-size: 20px;
+      font-weight: bold;
+      color: #72767d;
+      cursor: pointer;
+      padding: 0 5px;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+
+    .toast-close:hover {
+      color: #e3e3e3;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container-wrapper">
+    <div class="header">
+      <h1>YB MCWSS AI</h1>
+
+      <div class="header-right">
+        <div class="status-text">未啟動</div>
+
+        <div class="header-buttons">
+          <button class="open-btn">OpenWSS</button>
+          <button class="close-btn">CloseWSS</button>
+          <button class="open-log-btn" id="openLogBtn">OpenLogs</button>
+        </div>
+
+        <div class="info-icon" id="infoBtn">ⓘ</div>
+      </div>
+    </div>
+
+    <div class="settings-container">
+      <div class="settings-group" style="max-width: 218px">
+        <h2>系統設定</h2>
+
+        <div class="input-group">
+          <label>Port</label>
+          <input type="number" value="5218" placeholder="輸入 Port" />
+        </div>
+
+        <div class="input-group">
+          <label>Gemini API Key</label>
+          <input type="password" placeholder="輸入 Gemini API Key" />
+        </div>
+
+        <div class="input-group">
+          <label>Model</label>
+          <input type="text" value="gemini-1.5-flash" placeholder="輸入模型名稱" />
+        </div>
+
+        <div class="input-group">
+          <label>玩家訊息冷卻時間 (秒)</label>
+          <input type="number" value="5" placeholder="輸入冷卻秒數" />
+        </div>
+
+        <div class="toggle-switch-group">
+          <label>允許 AI 執行指令</label>
+          <label class="toggle-switch">
+            <input type="checkbox" />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-group" style="max-width: 218px">
+        <h2>AI 設定</h2>
+
+        <div class="input-group">
+          <label>AI 喚醒詞</label>
+          <input type="text" placeholder="輸入 AI 喚醒詞" />
+        </div>
+
+        <div class="input-group">
+          <label>AI 回應名稱條件(RegExp)</label>
+          <input type="text" placeholder="輸入回應名稱條件" />
+        </div>
+
+        <div class="input-group">
+          <label>AI 輸出長度</label>
+          <input type="number" value="512" placeholder="輸入輸出長度" />
+        </div>
+
+        <div class="slider-group">
+          <label>回應的創意程度</label>
+          <input type="range" min="0" max="2" value="0" step="0.01" class="creativity-slider" id="creativitySlider" />
+
+          <div class="slider-labels">
+            <span>左為最穩定</span>
+            <span>右為最創意</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <h2>AI Prompt</h2>
+
+        <div class="input-group textarea-container">
+          <textarea placeholder="請輸入 AI Prompt...">
+你是一個Minecraft bedrock翻譯助理，請盡你所能幫助玩家。你收到的訊息格式為：<玩家遊戲ID> 玩家訊息當接收到日文時請翻譯成繁體中文，接收到繁體中文請翻譯成日文</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div id="infoModal" class="modal">
+      <div class="modal-content">
+        <span class="modal-close" id="closeInfoModal">&times;</span>
+        <h2>應用資訊</h2>
+
+        <p>
+          <strong>開發者：</strong>過氣易爆<br />
+          <strong>應用版本：</strong>v1.0.0
+        </p>
+
+        <p><strong>注意：</strong>修改遊戲設定確保 ws 可以連線</p>
+
+        <ul>
+          <li>設定/一般/網路設定</li>
+
+          <li>[啟用] Websockets</li>
+
+          <li>[關閉] 需要加密的 Websockets</li>
+        </ul>
+
+        <p style="text-align: center">
+          <a href="https://www.youtube.com/@TWcreeper8766">前往易爆頻道</a>
+        </p>
+      </div>
+    </div>
+
+    <div id="logModal" class="modal">
+      <div class="modal-content">
+        <span class="modal-close" id="closeLogModal">&times;</span>
+        <h2>歷史 Logs</h2>
+
+        <pre id="logContent" class="log-content"></pre>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer"></div>
+
+  <script>
+    const infoBtn = document.getElementById("infoBtn");
+    const infoModal = document.getElementById("infoModal");
+    const closeInfoModalBtn = document.getElementById("closeInfoModal"); // 新增 log modal 相關元素
+
+    const openLogBtn = document.getElementById("openLogBtn");
+    const logModal = document.getElementById("logModal");
+    const closeLogModalBtn = document.getElementById("closeLogModal");
+    const logContent = document.getElementById("logContent");
+
+    let logHistory = []; // 儲存歷史 logs 的陣列
+
+    infoBtn.addEventListener("click", () => {
+      infoModal.style.display = "flex";
+    });
+
+    closeInfoModalBtn.addEventListener("click", () => {
+      infoModal.style.display = "none";
+    }); // 開啟 Log Modal
+
+    openLogBtn.addEventListener("click", () => {
+      // 清空舊內容
+      logContent.textContent = ""; // 載入所有歷史 logs
+      logHistory.forEach((log) => {
+        logContent.textContent += log + "\n";
+      }); // 讓卷軸滑到最底部
+      logContent.scrollTop = logContent.scrollHeight; // 顯示 Log Modal
+      logModal.style.display = "flex";
+    }); // 關閉 Log Modal
+
+    closeLogModalBtn.addEventListener("click", () => {
+      logModal.style.display = "none";
+    });
+
+    window.addEventListener("click", (event) => {
+      if (event.target === infoModal) {
+        infoModal.style.display = "none";
+      }
+      if (event.target === logModal) {
+        logModal.style.display = "none";
+      }
+    });
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      // DOM 元素
+      const portInput = document.querySelector(
+        'input[type="number"][value="5218"]'
+      );
+      const apiKeyInput = document.querySelector(
+        'input[placeholder="輸入 Gemini API Key"]'
+      );
+      const modelInput = document.querySelector(
+        'input[value="gemini-1.5-flash"]'
+      );
+      const allowCmdCheckbox = document.querySelector(".toggle-switch input");
+      const cooldownInput = document.querySelector(
+        'input[placeholder="輸入冷卻秒數"]'
+      );
+      const wakeWordInput = document.querySelector(
+        'input[placeholder="輸入 AI 喚醒詞"]'
+      );
+      const nameCondInput = document.querySelector(
+        'input[placeholder="輸入回應名稱條件"]'
+      );
+      const maxOutputInput = document.querySelector('input[value="512"]');
+      const creativitySlider = document.getElementById("creativitySlider");
+      const promptTextarea = document.querySelector(
+        ".textarea-container textarea"
+      );
+
+      const statusText = document.querySelector(".status-text");
+      const openBtn = document.querySelector(".open-btn");
+      const closeBtn = document.querySelector(".close-btn");
+      const toastContainer = document.getElementById("toastContainer");
+
+      try {
+        const settings = await window.electronAPI.getSettings();
+        if (settings) {
+          portInput.value = settings.port ?? 5218;
+          apiKeyInput.value = settings.apiKey ?? "";
+          modelInput.value = settings.modelName ?? "gemini-1.5-flash";
+          allowCmdCheckbox.checked = !!settings.allowCommands;
+          cooldownInput.value = settings.cooldown ?? 0;
+          wakeWordInput.value = settings.wakeWord ?? "";
+          nameCondInput.value = settings.playerRegex ?? "";
+          maxOutputInput.value = settings.maxOutput ?? 512;
+          creativitySlider.value = settings.creativity ?? 50;
+          promptTextarea.value = settings.prompt ?? "";
+        }
+      } catch (err) {
+        console.error("❌ 無法取得設定:", err);
+      } // 按下 OpenWSS 才更新設定
+
+      openBtn.addEventListener("click", () => {
+        const settings = {
+          port: Number(portInput.value),
+          apiKey: apiKeyInput.value,
+          modelName: modelInput.value,
+          allowCommands: allowCmdCheckbox.checked,
+          cooldown: Number(cooldownInput.value),
+          wakeWord: wakeWordInput.value,
+          playerRegex: nameCondInput.value,
+          maxOutput: Number(maxOutputInput.value),
+          creativity: Number(creativitySlider.value),
+          prompt: promptTextarea.value.trim(),
+        };
+        window.electronAPI.controlWSS("open", settings);
+      });
+
+      closeBtn.addEventListener("click", () => {
+        window.electronAPI.controlWSS("close");
+      }); // 更新右上角狀態
+
+      window.electronAPI.onStatusUpdate((status) => {
+        statusText.textContent = status;
+      }); // Toast 通知功能
+
+      function createToast(message) {
+        const toast = document.createElement("div");
+        toast.className = "toast";
+
+        const body = document.createElement("div");
+        body.className = "toast-body";
+        body.textContent = message;
+
+        const closeBtn = document.createElement("span");
+        closeBtn.className = "toast-close";
+        closeBtn.textContent = "×";
+        closeBtn.addEventListener("click", () => {
+          if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+          }
+        });
+
+        toast.appendChild(body);
+        toast.appendChild(closeBtn);
+
+        toastContainer.prepend(toast);
+
+        setTimeout(() => {
+          toast.classList.add("show");
+        }, 10);
+
+        setTimeout(() => {
+          hideToast(toast);
+        }, 4000);
+
+        const toRemove = Array.from(toastContainer.children).slice(3);
+        toRemove.forEach((oldToast) => hideToast(oldToast));
+      }
+
+      function hideToast(toast) {
+        if (!toast) return;
+
+        toast.classList.add("fade-out");
+        toast.addEventListener(
+          "transitionend",
+          () => {
+            if (toast.parentNode) {
+              toast.parentNode.removeChild(toast);
+            }
+          },
+          { once: true }
+        );
+      } // 註冊 log callback 並記錄歷史 logs
+
+      window.electronAPI.log((message) => {
+        const timestamp = new Date().toLocaleTimeString();
+        const formattedMessage = `[${timestamp}] ${message}`; // 1. 將新 log 加到歷史陣列的最後面
+
+        logHistory.push(formattedMessage);
+        if (logHistory.length > 500) {
+          // 移除最舊的 log
+          logHistory.shift();
+        } // 2. 顯示 Toast 通知
+
+        createToast(message); // 3. 如果 Log Modal 開啟中，直接更新內容並滑動
+
+        if (logModal.style.display === "flex") {
+          logContent.textContent += formattedMessage + "\n";
+          logContent.scrollTop = logContent.scrollHeight;
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
